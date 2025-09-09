@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Annex-A: BD MONITORING (2025-26) — Dashboard</title>
+
+  <!-- Bootstrap + libs -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <style>
+    body { background: #f8fafc; color: #0f172a; }
+    .pdf-table{width:100%;border-collapse:collapse;border:2px solid #111;background:#fff}
+    .pdf-table th,.pdf-table td{border:1px solid #111;padding:6px 8px;font-size:13px;line-height:1.25}
+    .pdf-table thead th{background:#f7f7f7;font-weight:700}
+    .align-right{text-align:right}.align-left{text-align:left}.center{text-align:center}
+    .emph{font-weight:700;background:#f1f5f9}
+    .editable{background:#fff8e1;outline:none;display:inline-block;min-width:48px}
+    .panel{background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+    .thead-block th{background:#fff;font-weight:800}
+    .edit-btn{border:1px solid #d1d5db;background:#fff;border-radius:8px;padding:6px 10px;font-size:13px}
+    .edit-btn.on{border-color:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.15) inset}
+    .exporting .no-export { visibility: hidden !important; }
+    @media print { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  </style>
+</head>
+<body>
+
+<!-- show JS errors instead of blank page -->
+<div id="errorBox" class="alert alert-danger d-none m-3"></div>
+
+<div id="exportArea">
+  <header class="sticky-top bg-white border-bottom">
+    <div class="container-xl py-3">
+      <div class="row align-items-center">
+        <div class="col-4"></div>
+        <div class="col-4 text-center">
+          <h1 id="hdrTitle" class="h5 fw-bold mb-0">Loading…</h1>
+          <p id="hdrSummary" class="small text-secondary mb-0"></p>
+        </div>
+        <div class="col-4 d-flex justify-content-end align-items-center gap-2 no-export">
+          <button id="toggleEdit" class="edit-btn" type="button">Enable Edit</button>
+          <button id="btnRefresh" class="edit-btn" type="button">Refresh Data</button>
+          <button id="btnPdf" class="edit-btn" type="button">Download PDF</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container-xl my-3">
+    <section class="panel mb-3">
+      <div class="p-3 text-center small">
+        <span class="badge rounded-pill text-secondary bg-white border">
+          Summary Report up to: <b id="ctxReportUpTo"></b>, MC Date: <b id="ctxMcDate"></b>
+        </span>
+        <span class="badge rounded-pill text-secondary bg-white border ms-2">
+          All values in <b>million Taka</b>
+        </span>
+      </div>
+    </section>
+
+    <section class="row g-3 mb-3">
+      <div class="col-12 col-lg-6">
+        <div class="panel">
+          <div class="px-3 pb-3 pt-2">
+            <table class="pdf-table">
+              <thead>
+                <tr class="thead-block"><th colspan="5" class="center" id="hdrSummaryTitle">BD MONITORING SUMMARY</th></tr>
+                <tr class="thead-block"><th colspan="5" class="center">Summary Report up to:
+                  <span id="t1ReportUpTo"></span>, MC Date: <span id="t1McDate"></span></th></tr>
+                <tr class="thead-block"><th colspan="5" class="center">Table - 1</th></tr>
+                <tr>
+                  <th class="align-left" style="width:40px"></th>
+                  <th class="align-left">Description</th>
+                  <th class="align-right" style="width:90px">%</th>
+                  <th class="align-right" style="width:130px">Amount</th>
+                  <th class="align-left" style="width:110px">Unit / Ref</th>
+                </tr>
+              </thead>
+              <tbody id="t1Body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="panel">
+          <div class="px-3 py-2">
+            <h2 class="h6 text-center fw-bold mb-0">BD Monitoring Summary</h2>
+          </div>
+          <div class="p-3 d-flex justify-content-center align-items-center" style="min-height: 330px;">
+            <canvas id="donutCanvas" width="420" height="330"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel mb-3">
+      <div class="px-3 py-2">
+        <h2 class="h6 text-center fw-bold mb-1">Table-2</h2>
+        <div class="text-center small fst-italic">
+          Carried over, New Contracts &amp; Pipeline Projects of all Divisions for the FY 2025-26 in million Taka
+        </div>
+      </div>
+      <div class="px-3 pb-3">
+        <div class="table-responsive">
+          <table class="pdf-table">
+            <thead>
+              <tr>
+                <th class="align-left" style="width:40px">Sl</th>
+                <th class="align-left" style="min-width:120px">Division Name</th>
+                <th class="align-right">Total Signed Amount<br><small>1 = 2 + 3</small></th>
+                <th class="align-right">Carried Over (2)</th>
+                <th class="align-right">New Contract (3)</th>
+                <th class="align-right">Total Pipeline Project Values<br><small>4 = 5 + 6 + 7</small></th>
+                <th class="align-right">Pipeline Confirmed (5)</th>
+                <th class="align-right">Pipeline Not confirmed (6)</th>
+                <th class="align-right">Pipeline Misc. (7)</th>
+                <th class="align-right">Revised Target As of Today (8)</th>
+              </tr>
+            </thead>
+            <tbody id="t2Body"></tbody>
+            <tfoot>
+              <tr id="t2Subtotal" class="emph"></tr>
+              <tr id="t2BankRow"></tr>
+              <tr id="t2Grand" class="emph"></tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="row g-3">
+      <div class="col-12 col-lg-6">
+        <div class="panel">
+          <div class="px-3 py-2">
+            <h2 class="h6 text-center fw-bold mb-1">Table-3</h2>
+            <div class="text-center small">
+              Status of Divisions - Difference from Original Target and Achieved Budget till To Date, in million Taka
+            </div>
+          </div>
+          <div class="px-3 pb-3">
+            <div class="table-responsive">
+              <table class="pdf-table">
+                <thead>
+                  <tr>
+                    <th class="align-left" style="width:40px">SL.</th>
+                    <th class="align-left" style="min-width:120px">Division Name</th>
+                    <th class="align-right">BoT Approved Target</th>
+                    <th class="align-right">Revised Target As of Today</th>
+                    <th class="align-right">Signed till Date</th>
+                    <th class="align-right">Target Achieved (%)</th>
+                  </tr>
+                </thead>
+                <tbody id="t3Body"></tbody>
+                <tfoot>
+                  <tr id="t3Subtotal" class="emph"></tr>
+                  <tr id="t3BankRow"></tr>
+                  <tr id="t3Grand" class="emph"></tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="panel">
+          <div class="px-3 py-2">
+            <h2 class="h6 text-center fw-bold mb-0">FY 2025-26 Target &amp; Achievement</h2>
+          </div>
+          <div class="p-3">
+            <canvas id="barCanvas" width="560" height="500"></canvas>
+            <div class="d-flex gap-3 small mt-2 justify-content-center">
+              <span class="d-inline-flex align-items-center gap-1">
+                <span class="d-inline-block rounded-1" style="width:12px;height:12px;background:#22c55e"></span>
+                Signed till Date
+              </span>
+              <span class="d-inline-flex align-items-center gap-1">
+                <span class="d-inline-block rounded-1" style="width:12px;height:12px;border:2px solid #f59e0b;background:transparent"></span>
+                BoT Approved Target
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(() => {
+  const API = '/api/budget/';
+  let RAW = null;      // last JSON from server
+  let DATA = null;     // normalized data we render
+  let editOn = false;
+
+  // error helper
+  function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.textContent = msg;
+    box.classList.remove('d-none');
+  }
+  window.addEventListener('error', (e) => showError(e.message || String(e)));
+
+  // utils
+  const fmt = n => Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const percent = (num, den) => den ? (num/den*100) : 0;
+  const signed = d => (d.carriedOver||0) + (d.newContract||0);
+  const pipelineTotal = d => (d.pipelineConfirmed||0) + (d.pipelineNotConfirmed||0) + (d.pipelineMisc||0);
+
+  // charts refs
+  let donut, barChart;
+
+  // fetch & normalize
+  async function loadData() {
+    const r = await fetch(API, {cache:'no-store'});
+    if (!r.ok) throw new Error(`GET ${API} failed: ${r.status}`);
+    RAW = await r.json();
+
+    // Provide defaults so rendering never crashes
+    const header = RAW.header || {};
+    const summary = RAW.summary || {};
+    const divisions = Array.isArray(RAW.divisions) ? RAW.divisions : [];
+
+    DATA = {
+      header: {
+        title: header.title || 'Annex-A: BD MONITORING (2025-26)',
+        summaryTitle: header.summaryTitle || 'BD MONITORING SUMMARY',
+        reportUpTo: header.reportUpTo || '',
+        mcDate: header.mcDate || ''
+      },
+      summary: {
+        botApprovedBudget: +summary.botApprovedBudget || 0,
+        interestNotInSBIS: +summary.interestNotInSBIS || 0,
+        carriedOver: +summary.carriedOver || 0,
+        newContract: +summary.newContract || 0,
+        pipelineConfirmed: +summary.pipelineConfirmed || 0,
+        pipelineNotConfirmed: +summary.pipelineNotConfirmed || 0,
+        pipelineMisc: +summary.pipelineMisc || 0
+      },
+      divisions: divisions.map(d => ({
+        name: d.name || '',
+        carriedOver:+d.carriedOver||0,
+        newContract:+d.newContract||0,
+        pipelineConfirmed:+d.pipelineConfirmed||0,
+        pipelineNotConfirmed:+d.pipelineNotConfirmed||0,
+        pipelineMisc:+d.pipelineMisc||0,
+        revisedTarget:+d.revisedTarget||0,
+        botApprovedTarget:+d.botApprovedTarget||0
+      }))
+    };
+  }
+
+  async function saveData() {
+    const r = await fetch(API, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(DATA)
+    });
+    if (!r.ok) throw new Error(`PUT ${API} failed: ${r.status}`);
+    RAW = await r.json();
+  }
+
+  // Renders
+  function fillHeader() {
+    document.getElementById('hdrTitle').textContent = DATA.header.title;
+    document.getElementById('hdrSummary').textContent = DATA.header.summaryTitle;
+    document.getElementById('hdrSummaryTitle').textContent = DATA.header.summaryTitle;
+    document.getElementById('ctxReportUpTo').textContent = DATA.header.reportUpTo;
+    document.getElementById('ctxMcDate').textContent = DATA.header.mcDate;
+    document.getElementById('t1ReportUpTo').textContent = DATA.header.reportUpTo;
+    document.getElementById('t1McDate').textContent = DATA.header.mcDate;
+  }
+
+  function renderTable1(){
+    // recompute summary from divisions
+    DATA.summary.carriedOver          = DATA.divisions.reduce((a,d)=>a+(d.carriedOver||0),0);
+    DATA.summary.newContract          = DATA.divisions.reduce((a,d)=>a+(d.newContract||0),0);
+    DATA.summary.pipelineConfirmed    = DATA.divisions.reduce((a,d)=>a+(d.pipelineConfirmed||0),0);
+    DATA.summary.pipelineNotConfirmed = DATA.divisions.reduce((a,d)=>a+(d.pipelineNotConfirmed||0),0);
+    DATA.summary.pipelineMisc         = DATA.divisions.reduce((a,d)=>a+(d.pipelineMisc||0),0);
+
+    const btd = DATA.summary.carriedOver + DATA.summary.newContract
+              + DATA.summary.pipelineConfirmed + DATA.summary.pipelineNotConfirmed + DATA.summary.pipelineMisc;
+    const btdPct = percent(btd, DATA.summary.botApprovedBudget);
+    const s = DATA.summary;
+
+    const rows = [
+      { no:'1',   label:'BoT Approved Budget', pct:'', amt:fmt(s.botApprovedBudget), unit:'Million Tk' },
+      { no:'2',   label:'Budget till Date, including pipeline -3series & Interest', pct:`${btdPct.toFixed(2)}%`, amt:fmt(btd), unit:'Million Tk' },
+      { no:'2.a', label:'Carried Over',                 pct:`${percent(s.carriedOver, btd).toFixed(2)}%`,  amt:fmt(s.carriedOver), unit:'Tbl-2-Col-2' },
+      { no:'2.b', label:'New Contract',                 pct:`${percent(s.newContract, btd).toFixed(2)}%`,  amt:fmt(s.newContract), unit:'Tbl-2-Col-3' },
+      { no:'2.c', label:'Pipeline (Confirmed)',         pct:`${percent(s.pipelineConfirmed, btd).toFixed(2)}%`, amt:fmt(s.pipelineConfirmed), unit:'Tbl-2-Col-5' },
+      { no:'2.d', label:'Pipeline (Not confirmed)',     pct:`${percent(s.pipelineNotConfirmed, btd).toFixed(2)}%`, amt:fmt(s.pipelineNotConfirmed), unit:'Tbl-2-Col-6' },
+      { no:'2.e', label:'Pipeline (misc.)',             pct:`${percent(s.pipelineMisc, btd).toFixed(2)}%`,  amt:fmt(s.pipelineMisc), unit:'Tbl-2-Col-7' },
+      { no:'2.f', label:'Interest (Not in SBIS)',       pct:`${percent(s.interestNotInSBIS, btd).toFixed(2)}%`, amt:fmt(s.interestNotInSBIS), unit:'Million Tk' },
+      { no:'3',   label:'Total Signed Contract Amount (2a+2b)', pct:`${percent(s.carriedOver + s.newContract, btd).toFixed(2)}%`, amt:fmt(s.carriedOver + s.newContract), unit:'Million Tk' },
+      { no:'4',   label:'Total Pipeline Projects',      pct:`${percent(s.pipelineConfirmed + s.pipelineNotConfirmed + s.pipelineMisc, btd).toFixed(2)}%`, amt:fmt(s.pipelineConfirmed + s.pipelineNotConfirmed + s.pipelineMisc), unit:'Million Tk' }
+    ];
+
+    const tb = document.getElementById('t1Body');
+    tb.innerHTML = '';
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="align-left"><b>${r.no}</b></td>
+        <td class="align-left">${r.label}</td>
+        <td class="align-right">${r.pct}</td>
+        <td class="align-right">${r.amt}</td>
+        <td class="align-left">${r.unit}</td>
+      `;
+      tb.appendChild(tr);
+    });
+  }
+
+  function renderTable2(){
+    const body = document.getElementById('t2Body');
+    body.innerHTML = '';
+    DATA.divisions.forEach((d,i)=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="align-left">${i+1}</td>
+        <td class="align-left">${d.name}</td>
+        <td class="align-right">${fmt(signed(d))}</td>
+        <td class="align-right"><span class="cell" data-idx="${i}" data-key="carriedOver">${fmt(d.carriedOver)}</span></td>
+        <td class="align-right"><span class="cell" data-idx="${i}" data-key="newContract">${fmt(d.newContract)}</span></td>
+        <td class="align-right">${fmt(pipelineTotal(d))}</td>
+        <td class="align-right"><span class="cell" data-idx="${i}" data-key="pipelineConfirmed">${fmt(d.pipelineConfirmed)}</span></td>
+        <td class="align-right"><span class="cell" data-idx="${i}" data-key="pipelineNotConfirmed">${fmt(d.pipelineNotConfirmed)}</span></td>
+        <td class="align-right"><span class="cell" data-idx="${i}" data-key="pipelineMisc">${fmt(d.pipelineMisc)}</span></td>
+        <td class="align-right"><span class="cell" data-idx="${i}" data-key="revisedTarget">${fmt(d.revisedTarget)}</span></td>
+      `;
+      body.appendChild(tr);
+    });
+
+    const nonBank = DATA.divisions.slice(0,11);
+    const bank    = DATA.divisions[11] || {carriedOver:0,newContract:0,pipelineConfirmed:0,pipelineNotConfirmed:0,pipelineMisc:0,revisedTarget:0};
+
+    const sub = {
+      signed: nonBank.reduce((a,d)=>a+signed(d),0),
+      co:     nonBank.reduce((a,d)=>a+(d.carriedOver||0),0),
+      nc:     nonBank.reduce((a,d)=>a+(d.newContract||0),0),
+      pipe:   nonBank.reduce((a,d)=>a+pipelineTotal(d),0),
+      pc:     nonBank.reduce((a,d)=>a+(d.pipelineConfirmed||0),0),
+      pnc:    nonBank.reduce((a,d)=>a+(d.pipelineNotConfirmed||0),0),
+      pm:     nonBank.reduce((a,d)=>a+(d.pipelineMisc||0),0),
+      rt:     nonBank.reduce((a,d)=>a+(d.revisedTarget||0),0)
+    };
+    document.getElementById('t2Subtotal').innerHTML = `
+      <td class="align-left" colspan="2">Sub-Total (1 - 11):</td>
+      <td class="align-right">${fmt(sub.signed)}</td>
+      <td class="align-right">${fmt(sub.co)}</td>
+      <td class="align-right">${fmt(sub.nc)}</td>
+      <td class="align-right">${fmt(sub.pipe)}</td>
+      <td class="align-right">${fmt(sub.pc)}</td>
+      <td class="align-right">${fmt(sub.pnc)}</td>
+      <td class="align-right">${fmt(sub.pm)}</td>
+      <td class="align-right">${fmt(sub.rt)}</td>
+    `;
+
+    document.getElementById('t2BankRow').innerHTML = `
+      <td class="align-left">12</td>
+      <td class="align-left">Bank Interest</td>
+      <td class="align-right">${fmt(signed(bank))}</td>
+      <td class="align-right"><span class="cell" data-idx="11" data-key="carriedOver">${fmt(bank.carriedOver)}</span></td>
+      <td class="align-right"><span class="cell" data-idx="11" data-key="newContract">${fmt(bank.newContract)}</span></td>
+      <td class="align-right">${fmt(pipelineTotal(bank))}</td>
+      <td class="align-right"><span class="cell" data-idx="11" data-key="pipelineConfirmed">${fmt(bank.pipelineConfirmed)}</span></td>
+      <td class="align-right"><span class="cell" data-idx="11" data-key="pipelineNotConfirmed">${fmt(bank.pipelineNotConfirmed)}</span></td>
+      <td class="align-right"><span class="cell" data-idx="11" data-key="pipelineMisc">${fmt(bank.pipelineMisc)}</span></td>
+      <td class="align-right"><span class="cell" data-idx="11" data-key="revisedTarget">${fmt(bank.revisedTarget)}</span></td>
+    `;
+
+    const all = {
+      signed: DATA.divisions.reduce((a,d)=>a+signed(d),0),
+      co:     DATA.divisions.reduce((a,d)=>a+(d.carriedOver||0),0),
+      nc:     DATA.divisions.reduce((a,d)=>a+(d.newContract||0),0),
+      pipe:   DATA.divisions.reduce((a,d)=>a+pipelineTotal(d),0),
+      pc:     DATA.divisions.reduce((a,d)=>a+(d.pipelineConfirmed||0),0),
+      pnc:    DATA.divisions.reduce((a,d)=>a+(d.pipelineNotConfirmed||0),0),
+      pm:     DATA.divisions.reduce((a,d)=>a+(d.pipelineMisc||0),0),
+      rt:     DATA.divisions.reduce((a,d)=>a+(d.revisedTarget||0),0)
+    };
+    document.getElementById('t2Grand').innerHTML = `
+      <td class="align-left" colspan="2">Total (1-12):</td>
+      <td class="align-right">${fmt(all.signed)}</td>
+      <td class="align-right">${fmt(all.co)}</td>
+      <td class="align-right">${fmt(all.nc)}</td>
+      <td class="align-right">${fmt(all.pipe)}</td>
+      <td class="align-right">${fmt(all.pc)}</td>
+      <td class="align-right">${fmt(all.pnc)}</td>
+      <td class="align-right">${fmt(all.pm)}</td>
+      <td class="align-right">${fmt(all.rt)}</td>
+    `;
+
+    document.querySelectorAll('#t2Body .cell, #t2BankRow .cell').forEach(el=>{
+      if (editOn) { el.contentEditable="true"; el.classList.add('editable'); el.addEventListener('blur', onCellEdit); }
+      else { el.contentEditable="false"; el.classList.remove('editable'); el.removeEventListener('blur', onCellEdit); }
+    });
+  }
+
+  function renderTable3(){
+    const body = document.getElementById('t3Body');
+    body.innerHTML = '';
+
+    DATA.divisions.forEach((d,i)=>{
+      const sVal = signed(d);
+      const ach  = percent(sVal, d.botApprovedTarget||0);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="align-left">${i+1}</td>
+        <td class="align-left">${d.name}</td>
+        <td class="align-right"><span class="cell3" data-idx="${i}" data-key="botApprovedTarget">${fmt(d.botApprovedTarget)}</span></td>
+        <td class="align-right"><span class="cell3" data-idx="${i}" data-key="revisedTarget">${fmt(d.revisedTarget)}</span></td>
+        <td class="align-right">${fmt(sVal)}</td>
+        <td class="align-right">${isFinite(ach)? ach.toFixed(2) : '0.00'}%</td>
+      `;
+      body.appendChild(tr);
+    });
+
+    const nonBank = DATA.divisions.slice(0,11);
+    const bank = DATA.divisions[11] || {botApprovedTarget:0, revisedTarget:0};
+
+    const subt = {
+      bot: nonBank.reduce((a,d)=>a+(d.botApprovedTarget||0),0),
+      rev: nonBank.reduce((a,d)=>a+(d.revisedTarget||0),0),
+      sgn: nonBank.reduce((a,d)=>a+signed(d),0)
+    };
+    document.getElementById('t3Subtotal').innerHTML = `
+      <td class="align-left" colspan="2">Sub-Total (1 - 11):</td>
+      <td class="align-right">${fmt(subt.bot)}</td>
+      <td class="align-right">${fmt(subt.rev)}</td>
+      <td class="align-right">${fmt(subt.sgn)}</td>
+      <td class="align-right">${percent(subt.sgn, subt.bot).toFixed(2)}%</td>
+    `;
+
+    document.getElementById('t3BankRow').innerHTML = `
+      <td class="align-left">12</td>
+      <td class="align-left">Bank Interest</td>
+      <td class="align-right"><span class="cell3" data-idx="11" data-key="botApprovedTarget">${fmt(bank.botApprovedTarget||0)}</span></td>
+      <td class="align-right"><span class="cell3" data-idx="11" data-key="revisedTarget">${fmt(bank.revisedTarget||0)}</span></td>
+      <td class="align-right">${fmt(signed(DATA.divisions[11]||{carriedOver:0,newContract:0}))}</td>
+      <td class="align-right">${percent(signed(DATA.divisions[11]||{carriedOver:0,newContract:0}), (bank.botApprovedTarget||0)).toFixed(2)}%</td>
+    `;
+
+    const grand = {
+      bot: DATA.divisions.reduce((a,d)=>a+(d.botApprovedTarget||0),0),
+      rev: DATA.divisions.reduce((a,d)=>a+(d.revisedTarget||0),0),
+      sgn: DATA.divisions.reduce((a,d)=>a+signed(d),0)
+    };
+    document.getElementById('t3Grand').innerHTML = `
+      <td class="align-left" colspan="2">Grand Total (1 - 12):</td>
+      <td class="align-right">${fmt(grand.bot)}</td>
+      <td class="align-right">${fmt(grand.rev)}</td>
+      <td class="align-right">${fmt(grand.sgn)}</td>
+      <td class="align-right">${percent(grand.sgn, grand.bot).toFixed(2)}%</td>
+    `;
+
+    document.querySelectorAll('#t3Body .cell3, #t3BankRow .cell3').forEach(el=>{
+      if (editOn) { el.contentEditable="true"; el.classList.add('editable'); el.addEventListener('blur', onCellEdit); }
+      else { el.contentEditable="false"; el.classList.remove('editable'); el.removeEventListener('blur', onCellEdit); }
+    });
+  }
+
+  function renderDonut() {
+    const s = DATA.summary;
+    const values = [ s.carriedOver, s.newContract, s.pipelineConfirmed, s.pipelineNotConfirmed, s.pipelineMisc ];
+    const labels = [ 'Carried Over', 'New Contract', 'Pipeline (Confirmed)', 'Pipeline (Not confirmed)', 'Pipeline (misc.)' ];
+    const ctx = document.getElementById('donutCanvas').getContext('2d');
+    if (donut) donut.destroy();
+    donut = new Chart(ctx, {
+      type:'doughnut',
+      data: { labels, datasets:[{ data: values, backgroundColor:['#22c55e','#f59e0b','#3b82f6','#ef4444','#6366f1'], borderColor:'#ffffff', borderWidth:2 }] },
+      options: { responsive:true, maintainAspectRatio:false, cutout:'56%', rotation:-0.5*Math.PI, animation:false,
+        plugins: { legend: { position:'right', labels: { boxWidth:14, boxHeight:14 } } } }
+    });
+  }
+
+  function renderBar() {
+    const order = ["WSU","SDT","RME","IGW","ICT","FRM","CPI"];
+    const byName = Object.fromEntries(DATA.divisions.map(d => [d.name, d]));
+    const labels = order.slice();
+    const signedVals  = order.map(n => (byName[n]?.carriedOver || 0) + (byName[n]?.newContract || 0));
+    const targetVals  = order.map(n => (byName[n]?.botApprovedTarget || 0));
+    const ctx = document.getElementById('barCanvas').getContext('2d');
+    if (barChart) barChart.destroy();
+    const maxVal = Math.max(...targetVals, ...signedVals, 1);
+    const suggestedMax = maxVal * 1.15;
+    barChart = new Chart(ctx, {
+      type:'bar',
+      data: { labels, datasets:[
+        { label:'BoT Approved Target', data:targetVals, indexAxis:'y', backgroundColor:'transparent', borderColor:'#f59e0b', borderWidth:2, barPercentage:0.4, categoryPercentage:0.55, maxBarThickness:12, grouped:false },
+        { label:'Signed till Date', data:signedVals, indexAxis:'y', backgroundColor:'#22c55e', borderColor:'#22c55e', borderWidth:1, barPercentage:0.4, categoryPercentage:0.55, maxBarThickness:12 }
+      ]},
+      options: {
+        responsive:false, animation:false, events:[], indexAxis:'y', maintainAspectRatio:true,
+        layout: { padding: { right:70, top:5, bottom:5 } },
+        scales: {
+          x: { beginAtZero:true, suggestedMax, title: { display:true, text:'Million Tk' }, grid: { color:'#e5e7eb' }, ticks: { font: { size:10 } } },
+          y: { grid: { display:false }, ticks: { font: { size:10 } } }
+        },
+        plugins: { legend: { display:false } }
+      }
+    });
+  }
+
+  function onCellEdit(e){
+    const el = e.currentTarget;
+    const idx = +el.dataset.idx;
+    const key = el.dataset.key;
+    const raw = (el.textContent||'').replace(/[, ]/g,'');
+    const val = isNaN(parseFloat(raw)) ? 0 : parseFloat(raw);
+    DATA.divisions[idx][key] = val;
+    renderAll();
+    // persist immediately
+    saveData().catch(err => showError(err.message || String(err)));
+  }
+
+  function renderAll(){
+    fillHeader();
+    renderTable1();
+    renderTable2();
+    renderTable3();
+    renderDonut();
+    renderBar();
+  }
+
+  // Buttons
+  document.getElementById('toggleEdit').addEventListener('click', ()=>{
+    editOn = !editOn;
+    const btn = document.getElementById('toggleEdit');
+    btn.classList.toggle('on', editOn);
+    btn.textContent = editOn ? 'Disable Edit' : 'Enable Edit';
+    renderAll();
+  });
+
+  async function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const node = document.getElementById('exportArea') || document.body;
+    document.body.classList.add('exporting');
+    await new Promise(r => setTimeout(r, 50));
+    const canvas = await html2canvas(node, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const imgW = pageW;
+    const imgH = canvas.height * imgW / canvas.width;
+    if (imgH <= pageH) {
+      pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH, undefined, 'FAST');
+    } else {
+      const pageCanvas = document.createElement('canvas');
+      const pageCtx = pageCanvas.getContext('2d');
+      const pageHpx = Math.floor(canvas.width * pageH / pageW);
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = pageHpx;
+      let y = 0, i = 0;
+      while (y < canvas.height) {
+        pageCtx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
+        pageCtx.drawImage(canvas, 0, y, canvas.width, pageHpx, 0, 0, canvas.width, pageHpx);
+        const chunk = pageCanvas.toDataURL('image/png');
+        if (i) pdf.addPage();
+        pdf.addImage(chunk, 'PNG', 0, 0, imgW, pageH, undefined, 'FAST');
+        y += pageHpx; i++;
+      }
+    }
+    const mcMatch = (DATA?.header?.summaryTitle || '').match(/\b(\d+)\b/);
+    const title = (DATA?.header?.title || 'dashboard').replace(/[^\w\- ()]/g,'').replace(/:/g,' -');
+    const fileName = mcMatch ? `Annex-A_BD Monitoring (MC-${mcMatch[1]}).pdf` : `${title}.pdf`;
+    pdf.setProperties({ title, subject: DATA?.header?.summaryTitle || '' });
+    pdf.save(fileName);
+    document.body.classList.remove('exporting');
+  }
+  document.getElementById('btnPdf').addEventListener('click', downloadPDF);
+
+  document.getElementById('btnRefresh').addEventListener('click', ()=>{
+    loadData().then(renderAll).catch(err => showError(err.message || String(err)));
+  });
+
+  // boot
+  loadData().then(renderAll).catch(err => showError(err.message || String(err)));
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

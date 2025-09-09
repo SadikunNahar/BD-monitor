@@ -1,0 +1,139 @@
+{
+  "header": {
+    "title": "Annex-A: BD MONITORING (2025-26)",
+    "summaryTitle": "BD MONITORING SUMMARY for 357 MC",
+    "reportUpTo": "August 25, 2025",
+    "mcDate": "26/August/2025"
+  },
+  "summary": {
+    "botApprovedBudget": 1427,
+    "interestNotInSBIS": 12,
+    "carriedOver": 556.68,
+    "newContract": 154.93,
+    "pipelineConfirmed": 68.53,
+    "pipelineNotConfirmed": 460.45,
+    "pipelineMisc": 40.41
+  },
+  "divisions": [
+    {
+      "name": "CPI",
+      "carriedOver": 165.62,
+      "newContract": 30.51,
+      "pipelineConfirmed": 25,
+      "pipelineNotConfirmed": 0,
+      "pipelineMisc": 13.09,
+      "revisedTarget": 234.22,
+      "botApprovedTarget": 234.22
+    },
+    {
+      "name": "FRM",
+      "carriedOver": 66.01,
+      "newContract": 0,
+      "pipelineConfirmed": 0,
+      "pipelineNotConfirmed": 65.55,
+      "pipelineMisc": 1.09,
+      "revisedTarget": 132.65,
+      "botApprovedTarget": 132.65
+    },
+    {
+      "name": "ICT",
+      "carriedOver": 94.69,
+      "newContract": 10.03,
+      "pipelineConfirmed": 0,
+      "pipelineNotConfirmed": 0,
+      "pipelineMisc": 0,
+      "revisedTarget": 104.72,
+      "botApprovedTarget": 104.72
+    },
+    {
+      "name": "IGW",
+      "carriedOver": 114.12,
+      "newContract": 3.4,
+      "pipelineConfirmed": 0,
+      "pipelineNotConfirmed": 84.55,
+      "pipelineMisc": 5,
+      "revisedTarget": 207.07,
+      "botApprovedTarget": 207.07
+    },
+    {
+      "name": "RME",
+      "carriedOver": 75.77,
+      "newContract": 9,
+      "pipelineConfirmed": 43.53,
+      "pipelineNotConfirmed": 110.46,
+      "pipelineMisc": 0,
+      "revisedTarget": 238.76,
+      "botApprovedTarget": 238.76
+    },
+    {
+      "name": "SDT",
+      "carriedOver": 22.56,
+      "newContract": 86.59,
+      "pipelineConfirmed": 0,
+      "pipelineNotConfirmed": 21.5,
+      "pipelineMisc": 21.23,
+      "revisedTarget": 151.88,
+      "botApprovedTarget": 151.88
+    },
+    {
+      "name": "WSU",
+      "carriedOver": 131.41,
+      "newContract": 5.11,
+      "pipelineConfirmed": 0,
+      "pipelineNotConfirmed": 133.35,
+      "pipelineMisc": 0,
+      "revisedTarget": 269.87,
+      "botApprovedTarget": 267.3
+    },
+    {
+      "name": "CCE",
+      "carriedOver": 3.83,
+      "newContract": 0,
+      "pipelineConfirmed": 0,
+      "pipelineNotConfirmed": 7.04,
+      "pipelineMisc": 0,
+      "revisedTarget": 10.87,
+      "botApprovedTarget": 17.69
+    },
+    {
+      "name": "RID",
+      "carriedOver": 6.38,
+      "newContract": 0,
+      "pipelineConfirmed": 0,
+      "pipelineNotConfirmed": 13,
+      "pipelineMisc": 0,
+      "revisedTarget": 19.38,
+      "botApprovedTarget": 22.43
+    },
+    {
+      "name": "SPB",
+      "carriedOver": 13.29,
+      "newContract": 10.29,
+      "pipelineConfirmed": 0,
+      "pipelineNotConfirmed": 20,
+      "pipelineMisc": 0,
+      "revisedTarget": 43.58,
+      "botApprovedTarget": 33.29
+    },
+    {
+      "name": "HRD",
+      "carriedOver": 0,
+      "newContract": 0,
+      "pipelineConfirmed": 0,
+      "pipelineNotConfirmed": 5,
+      "pipelineMisc": 0,
+      "revisedTarget": 5,
+      "botApprovedTarget": 5
+    },
+    {
+      "name": "Bank Interest",
+      "carriedOver": 12,
+      "newContract": 0,
+      "pipelineConfirmed": 0,
+      "pipelineNotConfirmed": 0,
+      "pipelineMisc": 0,
+      "revisedTarget": 12,
+      "botApprovedTarget": 12
+    }
+  ]
+}
